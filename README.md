@@ -191,7 +191,30 @@ cd ~/Desktop/Obsidian/Profile/portfolio-site && python3 -m http.server 8000
 
 ---
 
-## 6. 技術メモ
+## 6. セキュリティ対策
+
+| 対策 | 内容 |
+|---|---|
+| 読み込み元の制限（CSP） | `index.html` の先頭で、スクリプトはこのサイト内のファイルだけ、画像はサイト内とYouTubeのサムネイルだけ、などに制限。不正なスクリプトが紛れ込んでも実行されません |
+| 入力値のチェック | `config.js` の値は、安全な形式のときだけ使います（下表） |
+| 外部リンクの保護 | 別タブで開くリンクには `noopener noreferrer` を付け、開いた先のページからこのページを操作できないようにしています |
+| 送る情報の最小化 | 他サイトへの移動時に送る情報を、サイトのアドレス（ドメイン）だけにしています |
+| 暗号化通信 | GitHub Pages の設定で、常に https で表示（http は自動で https に転送） |
+| リポジトリの保護 | `main` ブランチの削除・履歴の上書き（force push）を禁止。使わない Wiki・Issues・Projects は無効化 |
+
+**config.js の値のチェック**
+- `photo`：サイト内の画像（`assets/...`）だけ。外部URLは不可
+- `email`：メールアドレスに使える文字だけ（`?` `&` などで宛先を追加する細工は不可）
+- `works` の `url`：`https://` で始まるYouTubeのURLだけ。リンクは動画IDから作り直して使用
+- `ai.url`：`https://` で始まるURLだけ
+
+**外部の画像・埋め込みを追加したいとき**
+CSPで許可していない場所からは読み込めません。たとえばInstagramの埋め込みを入れる場合は、`index.html` 先頭の `Content-Security-Policy` に読み込み先を追加する必要があります。
+
+**GitHub Pages の制約で、できないこと**
+- サーバー側の細かいセキュリティ設定（他サイトへの埋め込み禁止など）は、GitHub Pages では設定できません
+
+## 7. 技術メモ
 - 同梱ライブラリ：BudouX 0.9.3（Google製、Apache-2.0ライセンス。商用利用可）。日本語用の部品だけを `js/vendor/budoux-ja.js` に収めています
 - 外部サービスは「Google Fonts（Marcellus／Noto Serif JP）」と「YouTube（サムネイル・動画再生）」のみ。どちらも無料・登録不要
 - YouTubeはプライバシー強化モード（youtube-nocookie.com）で埋め込んでいます

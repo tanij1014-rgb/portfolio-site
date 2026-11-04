@@ -28,7 +28,9 @@
   /* ---------- 顔写真 ---------- */
   var photo = trim(config.photo);
   var photoEl = document.querySelector("[data-photo]");
-  if (photoEl && photo) {
+  // サイト内の画像（assets/... などの相対パス）だけを許可する
+  var isLocalPath = /^(?!\/\/)(?![a-z][a-z0-9+.-]*:)[\w\-./]+$/i.test(photo) && photo.indexOf("..") === -1;
+  if (photoEl && photo && isLocalPath) {
     photoEl.src = photo;
     photoEl.alt = (name || "") + "のプロフィール写真";
   }
@@ -37,8 +39,9 @@
   var email = trim(config.email);
   var mailBtn = document.querySelector("[data-mail]");
   var mailNote = document.querySelector("[data-mail-note]");
-  // 簡易チェック：正しい形式で、かつ example.com などの例示用アドレスでないこと
-  var isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) && !/@example\.(com|org|net|jp)$/i.test(email);
+  // チェック：メールアドレスに使える文字だけで、かつ example.com などの例示用アドレスでないこと
+  // （「?」「&」などを含むと、CC・BCCなどの宛先を勝手に追加できてしまうため不可）
+  var isValidEmail = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}$/.test(email) && !/@example\.(com|org|net|jp)$/i.test(email);
   if (mailBtn && isValidEmail) {
     var subject = trim(config.mailSubject);
     mailBtn.href = "mailto:" + email + (subject ? "?subject=" + encodeURIComponent(subject) : "");
@@ -53,10 +56,11 @@
   var works = Array.isArray(config.works) ? config.works : [];
 
   // YouTubeのURLから動画IDを取り出す（watch / youtu.be / shorts / embed に対応）
+  // https で始まる YouTube のURLだけを受け付ける（それ以外は「動画準備中」の表示になる）
   function getYouTubeId(url) {
     url = trim(url);
     if (!url) return "";
-    var m = url.match(/(?:youtube\.com\/(?:watch\?(?:.*&)?v=|shorts\/|embed\/|live\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+    var m = url.match(/^https:\/\/(?:(?:www\.|m\.)?youtube\.com\/(?:watch\?(?:[^#]*&)?v=|shorts\/|embed\/|live\/)|youtu\.be\/)([A-Za-z0-9_-]{11})(?:[?&#/]|$)/);
     return m ? m[1] : "";
   }
 
@@ -105,6 +109,8 @@
       iframe.title = title || "制作実績の動画";
       iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
       iframe.allowFullscreen = true;
+      // YouTubeは再生に「どのサイトから埋め込まれたか」の情報が必要なため、サイトのアドレスだけを渡す
+      iframe.referrerPolicy = "strict-origin-when-cross-origin";
       btn.replaceWith(iframe);
       iframe.focus();
     });
@@ -148,9 +154,10 @@
 
       if (id) {
         var link = el("a", "work-link", "YouTubeで見る");
-        link.href = trim(work.url);
+        // 入力されたURLをそのまま使わず、取り出した動画IDから YouTube の正式なURLを作り直す
+        link.href = "https://www.youtube.com/" + (format === "short" ? "shorts/" + id : "watch?v=" + id);
         link.target = "_blank";
-        link.rel = "noopener";
+        link.rel = "noopener noreferrer";
         link.appendChild(el("span", "arrow"));
         body.appendChild(link);
       }
@@ -292,11 +299,13 @@
   var aiUrl = trim(ai.url);
   var aiLink = document.querySelector("[data-ai-link]");
   var aiNote = document.querySelector("[data-ai-note]");
-  // http(s) で始まるURLのときだけボタンを有効にする
-  if (aiLink && /^https?:\/\/\S+$/.test(aiUrl)) {
+  // https で始まる正しいURLのときだけボタンを有効にする（暗号化されていない http や javascript: などは不可）
+  var aiUrlOk = false;
+  try { aiUrlOk = /^https:\/\/[^\s"'<>]+$/.test(aiUrl) && new URL(aiUrl).protocol === "https:"; } catch (e) { aiUrlOk = false; }
+  if (aiLink && aiUrlOk) {
     aiLink.href = aiUrl;
     aiLink.target = "_blank";
-    aiLink.rel = "noopener";
+    aiLink.rel = "noopener noreferrer";
     aiLink.classList.remove("is-disabled");
     aiLink.removeAttribute("aria-disabled");
     aiLink.removeAttribute("role");

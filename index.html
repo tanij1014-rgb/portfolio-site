@@ -2,6 +2,15 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8">
+  <!-- ▼ セキュリティ設定（CSP）：下に書いた場所以外からは、スクリプト・画像・フォント・動画などを読み込まない
+       ・script  … このサイト内のファイルのみ（ページ内に直接書いたスクリプトも禁止）
+       ・style/font … このサイト内と Google Fonts のみ
+       ・img     … このサイト内と YouTube のサムネイル（i.ytimg.com）のみ
+       ・frame   … YouTube の動画プレーヤー（プライバシー強化モード）のみ
+       外部の画像や埋め込みを増やすときは、ここに追加しないと表示されません（README参照） -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https://i.ytimg.com; frame-src https://www.youtube-nocookie.com; connect-src 'none'; manifest-src 'self'; media-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; upgrade-insecure-requests">
+  <!-- 他のサイトへ移動するとき、送る情報をサイトのアドレス（ドメイン）だけにする -->
+  <meta name="referrer" content="strict-origin-when-cross-origin">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 
   <!-- ▼ SEO基本設定 -->
@@ -32,7 +41,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Noto+Serif+JP:wght@400;600&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="css/style.css">
-  <script>document.documentElement.classList.add("js");</script>
+  <script src="js/boot.js"></script>
   <script src="config.js" defer></script>
   <script src="js/vendor/budoux-ja.js" defer></script>
   <script src="js/main.js" defer></script>
