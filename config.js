@@ -32,7 +32,7 @@ window.SITE_CONFIG = {
   //       「AI活用・業務効率化関連はこちら」ボタンを押すと、このURLが新しいタブで開きます
   //       空欄のときはボタンが無効になり「準備中」と表示されます
   ai: {
-    url: "",
+    url: "https://tanij1014-rgb.github.io/ai-support/",
   },
 
   // ── 動画制作実績（WORKS）────────────────
